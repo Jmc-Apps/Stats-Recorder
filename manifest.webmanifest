@@ -1,7 +1,7 @@
 {
   "name": "Goalie Stats Recorder",
   "short_name": "Stats Recorder",
-  "description": "Goalie Stats Recorder v1.06, compatible with Hockey Goalie Stats v4.04.",
+  "description": "Goalie Stats Recorder v1.07; exports match files named like Hockey Goalie Stats matches.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
