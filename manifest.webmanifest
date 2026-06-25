@@ -1,25 +1,10 @@
 {
   "name": "Goalie Stats Recorder",
-  "short_name": "Stats Recorder",
-  "description": "Goalie Stats Recorder v1.08, compatible with Hockey Goalie Stats v4.09.",
+  "short_name": "Goalie Recorder",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
-  "background_color": "#141414",
-  "theme_color": "#141414",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#071014",
+  "theme_color": "#071014",
+  "description": "Goalie Stats Recorder v1.19 with direct visible heat-map marker placement.",
+  "icons": []
 }
