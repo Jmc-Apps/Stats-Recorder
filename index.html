@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Goalie Stats Recorder v1.20</title>
+<title>Goalie Stats Recorder v1.22</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#071014">
 <style>
@@ -40,15 +40,51 @@ nav{position:fixed;left:0;right:0;bottom:0;height:54px;background:rgba(6,12,16,.
 .summary-check{font-size:62px;text-align:center;color:var(--green);line-height:1}.rating-row{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #26323b;padding:9px 0}.stars button{background:transparent;border:0;color:#42515c;font-size:23px;padding:0 1px}.stars button.on{color:var(--green)}
 @media (max-height:720px){.big-actions .btn{font-size:16px;padding:11px}.counter .num{font-size:24px}.defence b{font-size:24px}.card{padding:8px}.mapbox{height:36dvh;min-height:200px}.mapbox.goal{height:28dvh;min-height:170px}}
 </style>
+
+<style>
+/* v1.22 live save/defence rates on home screen */
+.live-rate-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.live-rate-card{
+  text-align:center;
+  border:1px solid var(--line,#2d3a43);
+  border-radius:12px;
+  padding:8px;
+  background:#0c1318;
+}
+.live-rate-card span{
+  display:block;
+  font-size:10px;
+  font-weight:900;
+  color:var(--muted,#a9b3bd);
+  text-transform:uppercase;
+}
+.live-rate-card b{
+  display:block;
+  font-size:25px;
+  line-height:1.05;
+  color:var(--green,#61d12f);
+}
+.live-rate-card.save-rate b{color:#61d12f;}
+.live-rate-card.def-rate b{color:#61d12f;}
+@media(max-height:720px){
+  .live-rate-card{padding:7px;}
+  .live-rate-card b{font-size:22px;}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-<header><div class="topbar"><h1>Goalie Stats Recorder</h1><div class="ver">v1.20</div></div></header>
+<header><div class="topbar"><h1>Goalie Stats Recorder</h1><div class="ver">v1.22</div></div></header>
 <main>
 <section id="home" class="screen active">
   <div class="card match-head"><div class="goaliename" id="dashGoalie">No goalie selected</div><div class="team" id="dashTeam">Import/select goalie & team</div><div class="vs">VS</div><div class="opp" id="dashOpp">Opponent</div><div class="small" id="dashDate"></div></div>
   <div class="counter-grid"><div class="counter save"><div class="label">SAVES</div><div class="num" id="saveCount">0</div></div><div class="counter goal"><div class="label">GOALS</div><div class="num" id="goalCount">0</div></div></div>
-  <div class="defence"><span>DEFENCE RATE</span><b id="defRate">N/C</b></div>
+  <div class="live-rate-grid"><div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div><div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div></div>
   <div class="card"><b>MATCH TIMELINE</b><div class="timeline" id="timelinePills"></div><div class="home-actions"><button class="btn ghost" id="viewTimelineBtn">VIEW</button><button class="btn orange" id="undoBtn">UNDO</button></div><button class="btn blue" id="periodBtn">END OF PERIOD</button></div>
   <div class="big-actions"><button class="btn green" id="saveBtn">SAVE</button><button class="btn red" id="goalBtn">GOAL</button><button class="btn gold" id="angleBtn">ANGLE CLOSED OFF</button></div>
   <button class="btn blue" id="finishBtn">FINISH MATCH</button>
@@ -63,7 +99,7 @@ nav{position:fixed;left:0;right:0;bottom:0;height:54px;background:rgba(6,12,16,.
 <nav><div class="nav-inner"><button class="navbtn on" data-go="home" data-screen="home"><span>🏠</span>Home</button><button class="navbtn" data-go="setup" data-screen="setup"><span>🥅</span>Setup</button><button class="navbtn" data-go="timeline" data-screen="timeline"><span>📋</span>Timeline</button><button class="navbtn" data-go="import" data-screen="import"><span>☁️</span>Import</button><button class="navbtn" data-go="finish" data-screen="finish"><span>✅</span>Finish</button></div></nav>
 </div>
 <script>
-const RECORDER_VERSION="1.20", HOCKEY_STATS_VERSION="4.09", LS_STATE="gsr_v120_state", LS_MASTER="goalieStatsRecorderMasterData";
+const RECORDER_VERSION="1.22", HOCKEY_STATS_VERSION="4.09", LS_STATE="gsr_v122_state", LS_MASTER="goalieStatsRecorderMasterData";
 let state=JSON.parse(localStorage.getItem(LS_STATE)||"null")||{goalieName:"",homeTeam:"",opponentTeam:"",date:new Date().toISOString().slice(0,10),homeGoals:0,shots:[],timeline:[],ratings:{"Positioning":4,"Communication":4,"Rebound Control":4,"Decision Making":4}};
 let pending=null;
 function $(id){return document.getElementById(id)}
@@ -143,7 +179,7 @@ window.addEventListener("load",()=>{if(!state.timeline)state.timeline=[];loadMas
 
 <script>
 (function(){
-  window.RECORDER_VERSION = "1.20";
+  window.RECORDER_VERSION="1.22";
 
   function n(v){ var x=Number(v||0); return Number.isFinite(x)?x:0; }
 
@@ -206,6 +242,134 @@ window.addEventListener("load",()=>{if(!state.timeline)state.timeline=[];loadMas
     hideOldHomeGoals();
     updateFinishHomeGoals();
   },0);
+})();
+</script>
+
+
+<script>
+/* v1.22: live Save Rate and Defence Rate on Home screen */
+(function(){
+  window.RECORDER_VERSION = "1.22";
+
+  function pct(a,b){
+    return b > 0 ? Math.round((a / b) * 100) + "%" : "N/C";
+  }
+
+  function shotList(){
+    try{
+      if(typeof shotOnly === "function") return shotOnly();
+    }catch(e){}
+    try{
+      if(typeof state !== "undefined" && Array.isArray(state.shots)){
+        return state.shots.filter(function(s){ return !s.eventType; });
+      }
+    }catch(e){}
+    return [];
+  }
+
+  function calcLiveSaveRate(){
+    var shots = shotList();
+    var saves = shots.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = shots.filter(function(s){ return s.outcome === "Goal"; }).length;
+    return pct(saves, saves + goals);
+  }
+
+  function calcLiveDefenceRate(){
+    var shots = shotList();
+    var saves = shots.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = shots.filter(function(s){ return s.outcome === "Goal"; }).length;
+    var angles = shots.filter(function(s){ return s.outcome === "Angle Closed Off"; }).length;
+    return pct(saves + angles, saves + goals + angles);
+  }
+
+  function ensureLiveRatePanel(){
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
+
+    if(saveEl && defEl) return;
+
+    var oldDef = document.getElementById("defRate");
+    if(oldDef){
+      var oldCard = oldDef.closest(".defence,.card,div");
+      if(oldCard && !document.getElementById("saveRateLive")){
+        var grid = document.createElement("div");
+        grid.className = "live-rate-grid";
+        grid.innerHTML =
+          '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+          '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+        oldCard.replaceWith(grid);
+      }
+      return;
+    }
+
+    var counterGrid = document.querySelector(".counter-grid");
+    if(counterGrid && !document.getElementById("saveRateLive")){
+      var panel = document.createElement("div");
+      panel.className = "live-rate-grid";
+      panel.innerHTML =
+        '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+        '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+      counterGrid.insertAdjacentElement("afterend", panel);
+    }
+  }
+
+  function renderLiveRates(){
+    ensureLiveRatePanel();
+
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
+
+    if(saveEl) saveEl.textContent = calcLiveSaveRate();
+    if(defEl) defEl.textContent = calcLiveDefenceRate();
+  }
+
+  var oldRender = window.render;
+  if(typeof oldRender === "function" && !window.__v122RenderWrapped){
+    window.render = function(){
+      var result = oldRender.apply(this, arguments);
+      renderLiveRates();
+      return result;
+    };
+    window.__v122RenderWrapped = true;
+  }
+
+  var oldShowScreen = window.showScreen;
+  if(typeof oldShowScreen === "function" && !window.__v122ShowWrapped){
+    window.showScreen = function(){
+      var result = oldShowScreen.apply(this, arguments);
+      renderLiveRates();
+      return result;
+    };
+    window.__v122ShowWrapped = true;
+  }
+
+  ["saveShot","undoPrompt","addPeriodMarker"].forEach(function(fnName){
+    var oldFn = window[fnName];
+    if(typeof oldFn === "function" && !oldFn.__v122RatesWrapped){
+      window[fnName] = function(){
+        var result = oldFn.apply(this, arguments);
+        setTimeout(renderLiveRates, 0);
+        return result;
+      };
+      window[fnName].__v122RatesWrapped = true;
+    }
+  });
+
+  document.addEventListener("click", function(){
+    setTimeout(renderLiveRates, 0);
+  });
+  document.addEventListener("change", function(){
+    setTimeout(renderLiveRates, 0);
+  });
+
+  setTimeout(function(){
+    renderLiveRates();
+    document.querySelectorAll("*").forEach(function(el){
+      if(el.children.length === 0 && /v1\.\d+/.test(el.textContent || "")){
+        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.22");
+      }
+    });
+  }, 0);
 })();
 </script>
 

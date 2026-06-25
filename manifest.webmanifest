@@ -5,6 +5,6 @@
   "display": "standalone",
   "background_color": "#071014",
   "theme_color": "#071014",
-  "description": "Goalie Stats Recorder v1.20 with Home Goals moved to Finish Match.",
+  "description": "Goalie Stats Recorder v1.22 with live Save Rate and Defence Rate on the home screen.",
   "icons": []
 }
