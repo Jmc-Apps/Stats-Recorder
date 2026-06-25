@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Goalie Stats Recorder v1.19</title>
+<title>Goalie Stats Recorder v1.20</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#071014">
 <style>
@@ -43,7 +43,7 @@ nav{position:fixed;left:0;right:0;bottom:0;height:54px;background:rgba(6,12,16,.
 </head>
 <body>
 <div class="app">
-<header><div class="topbar"><h1>Goalie Stats Recorder</h1><div class="ver">v1.19</div></div></header>
+<header><div class="topbar"><h1>Goalie Stats Recorder</h1><div class="ver">v1.20</div></div></header>
 <main>
 <section id="home" class="screen active">
   <div class="card match-head"><div class="goaliename" id="dashGoalie">No goalie selected</div><div class="team" id="dashTeam">Import/select goalie & team</div><div class="vs">VS</div><div class="opp" id="dashOpp">Opponent</div><div class="small" id="dashDate"></div></div>
@@ -53,17 +53,17 @@ nav{position:fixed;left:0;right:0;bottom:0;height:54px;background:rgba(6,12,16,.
   <div class="big-actions"><button class="btn green" id="saveBtn">SAVE</button><button class="btn red" id="goalBtn">GOAL</button><button class="btn gold" id="angleBtn">ANGLE CLOSED OFF</button></div>
   <button class="btn blue" id="finishBtn">FINISH MATCH</button>
 </section>
-<section id="setup" class="screen"><div class="scroll"><div class="card"><h2>Match Setup</h2><label>Goalie</label><select id="goalieSelect"></select><label>Team</label><select id="teamSelect"></select><label>Date</label><input id="matchDate" type="date"><label>Opponent</label><input id="opponentTeam" placeholder="Opponent team"><label>Home Goals</label><input id="homeGoals" type="number" min="0" value="0"><button class="btn green" id="saveSetupBtn">SAVE SETUP</button></div></div></section>
+<section id="setup" class="screen"><div class="scroll"><div class="card"><h2>Match Setup</h2><label>Goalie</label><select id="goalieSelect"></select><label>Team</label><select id="teamSelect"></select><label>Date</label><input id="matchDate" type="date"><label>Opponent</label><input id="opponentTeam" placeholder="Opponent team"><button class="btn green" id="saveSetupBtn">SAVE SETUP</button></div></div></section>
 <section id="import" class="screen"><div class="scroll"><div class="card" style="text-align:center"><div style="font-size:56px">☁️</div><h2>Import Goalies & Teams</h2><p class="small">Import master data exported from Hockey Goalie Stats.</p><input id="masterFile" type="file" accept=".json,application/json"><button class="btn green" id="importBtn">IMPORT</button><p id="importStatus" class="small"></p></div></div></section>
 <section id="timeline" class="screen"><div class="scroll"><div class="card"><h2>Match Timeline</h2><div id="timelineList"></div><button class="btn ghost" id="closeTimelineBtn">CLOSE</button></div></div></section>
 <section id="wizard" class="screen"><div class="wizard-head"><button class="back" id="backWizardBtn">‹</button><h2 id="wizardTitle">Record Shot</h2></div><div class="progress"><div id="progressBar"></div></div><div id="wizardBody" class="scroll"></div><div class="bottom-save"><button class="btn green" id="quickSaveBtn">CONFIRM & SAVE NOW</button></div></section>
-<section id="finish" class="screen"><div class="scroll"><div class="card"><h2>Finish Match</h2><p class="small">Tap stars to score coaching ratings.</p><div id="ratings"></div><button class="btn green" id="finishSaveBtn">SAVE RATINGS & FINISH</button><button class="btn ghost" id="finishBackBtn">BACK</button></div></div></section>
+<section id="finish" class="screen"><div class="scroll"><div class="card"><h2>Finish Match</h2><label>Home Team Goals</label><input id="finishHomeGoals" type="number" min="0" value="0"><p class="small">Tap stars to score coaching ratings.</p><div id="ratings"></div><button class="btn green" id="finishSaveBtn">SAVE RATINGS & FINISH</button><button class="btn ghost" id="finishBackBtn">BACK</button></div></div></section>
 <section id="summary" class="screen"><div class="scroll"><div class="card" style="text-align:center"><div class="summary-check">✓</div><h2 style="color:var(--green)">MATCH SAVED!</h2><div id="summaryText"></div><div class="counter-grid" style="margin-top:10px"><div class="counter save"><div class="label">SAVES</div><div class="num" id="sumSaves">0</div></div><div class="counter goal"><div class="label">GOALS</div><div class="num" id="sumGoals">0</div></div></div><div class="counter angle" style="margin-top:8px"><div class="label">ANGLES</div><div class="num" id="sumAngles">0</div></div><div class="defence" style="margin-top:8px"><span>DEFENCE RATE</span><b id="sumDef">N/C</b></div><button class="btn blue" id="exportBtn">EXPORT MATCH</button><button class="btn ghost" id="summaryHomeBtn">BACK TO HOME</button></div></div></section>
 </main>
 <nav><div class="nav-inner"><button class="navbtn on" data-go="home" data-screen="home"><span>🏠</span>Home</button><button class="navbtn" data-go="setup" data-screen="setup"><span>🥅</span>Setup</button><button class="navbtn" data-go="timeline" data-screen="timeline"><span>📋</span>Timeline</button><button class="navbtn" data-go="import" data-screen="import"><span>☁️</span>Import</button><button class="navbtn" data-go="finish" data-screen="finish"><span>✅</span>Finish</button></div></nav>
 </div>
 <script>
-const RECORDER_VERSION="1.19", HOCKEY_STATS_VERSION="4.09", LS_STATE="gsr_v119_state", LS_MASTER="goalieStatsRecorderMasterData";
+const RECORDER_VERSION="1.20", HOCKEY_STATS_VERSION="4.09", LS_STATE="gsr_v120_state", LS_MASTER="goalieStatsRecorderMasterData";
 let state=JSON.parse(localStorage.getItem(LS_STATE)||"null")||{goalieName:"",homeTeam:"",opponentTeam:"",date:new Date().toISOString().slice(0,10),homeGoals:0,shots:[],timeline:[],ratings:{"Positioning":4,"Communication":4,"Rebound Control":4,"Decision Making":4}};
 let pending=null;
 function $(id){return document.getElementById(id)}
@@ -141,167 +141,70 @@ $("goalieSelect").addEventListener("change",()=>goalieChanged(true));$("teamSele
 window.addEventListener("load",()=>{if(!state.timeline)state.timeline=[];loadMaster();render();if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js")});
 </script>
 
-<style>
-/* v1.19: direct marker placement, no screen redraw on tap */
-.marker{
-  position:absolute!important;
-  width:34px!important;
-  height:34px!important;
-  border-radius:50%!important;
-  transform:translate(-50%,-50%)!important;
-  border:5px solid #fff!important;
-  box-shadow:0 0 0 7px rgba(34,117,215,.55), 0 0 22px rgba(0,0,0,.85)!important;
-  z-index:9999!important;
-  pointer-events:none!important;
-}
-.marker.save{background:#61d12f!important;}
-.marker.goal{background:#e23b30!important;}
-.marker.angle{background:#e4b51b!important;}
-.mapbox[data-map]{
-  position:relative!important;
-  touch-action:none!important;
-  cursor:crosshair!important;
-}
-.position-readout{
-  margin-top:6px;
-  text-align:center;
-  color:#61d12f;
-  font-weight:900;
-  font-size:12px;
-}
-</style>
-
 <script>
-/* v1.19: place the marker directly on the current map instead of redrawing the page */
 (function(){
-  window.RECORDER_VERSION = "1.19";
+  window.RECORDER_VERSION = "1.20";
 
-  function currentMarkerClass(){
-    try{
-      if(pending && pending.outcome === "Goal") return "goal";
-      if(pending && pending.outcome === "Angle Closed Off") return "angle";
-      return "save";
-    }catch(e){
-      return "save";
+  function n(v){ var x=Number(v||0); return Number.isFinite(x)?x:0; }
+
+  function syncFinishHomeGoals(){
+    var el=document.getElementById("finishHomeGoals");
+    if(el && typeof state !== "undefined"){
+      state.homeGoals=n(el.value);
+      try{ save(); }catch(e){}
+      try{ render(); }catch(e){}
     }
   }
 
-  function setReadout(mapEl, x, y){
-    var existing = mapEl.parentElement && mapEl.parentElement.querySelector(".position-readout");
-    if(!existing){
-      existing = document.createElement("div");
-      existing.className = "position-readout";
-      mapEl.insertAdjacentElement("afterend", existing);
-    }
-    existing.textContent = "Position selected: " + x + "%, " + y + "%";
+  function updateFinishHomeGoals(){
+    var el=document.getElementById("finishHomeGoals");
+    if(el && typeof state !== "undefined") el.value=state.homeGoals||0;
   }
 
-  function drawMarkerOnMap(mapEl, x, y){
-    if(!mapEl) return;
-    var old = mapEl.querySelector(".marker");
-    if(!old){
-      old = document.createElement("div");
-      mapEl.appendChild(old);
+  function hideOldHomeGoals(){
+    var old=document.getElementById("homeGoals");
+    if(old){
+      var label=old.previousElementSibling;
+      if(label && /home goals/i.test(label.textContent||"")) label.style.display="none";
+      old.style.display="none";
     }
-    old.className = "marker " + currentMarkerClass();
-    old.style.left = x + "%";
-    old.style.top = y + "%";
-    setReadout(mapEl, x, y);
   }
 
-  function calculatePoint(e, mapEl){
-    var r = mapEl.getBoundingClientRect();
-    var clientX = e.clientX;
-    var clientY = e.clientY;
-
-    if(e.touches && e.touches.length){
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-    if(e.changedTouches && e.changedTouches.length){
-      clientX = e.changedTouches[0].clientX;
-      clientY = e.changedTouches[0].clientY;
-    }
-
-    var x = ((clientX - r.left) / r.width) * 100;
-    var y = ((clientY - r.top) / r.height) * 100;
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-
-    return {
-      x: Math.round(x * 10) / 10,
-      y: Math.round(y * 10) / 10
+  var oldShow=window.showScreen;
+  if(typeof oldShow==="function" && !window.__v120ShowWrapped){
+    window.showScreen=function(id){
+      oldShow.apply(this, arguments);
+      if(id==="finish") updateFinishHomeGoals();
+      hideOldHomeGoals();
     };
+    window.__v120ShowWrapped=true;
   }
 
-  window.mapTap = function(e, kind){
-    if(typeof pending === "undefined" || !pending) return;
-    var mapEl = e.currentTarget || (e.target && e.target.closest && e.target.closest(".mapbox[data-map]"));
-    if(!mapEl) return;
-
-    var p = calculatePoint(e, mapEl);
-
-    if(kind === "d" || mapEl.dataset.map === "d"){
-      pending.dX = p.x;
-      pending.dY = p.y;
-    }else{
-      pending.gX = p.x;
-      pending.gY = p.y;
-    }
-
-    drawMarkerOnMap(mapEl, p.x, p.y);
-  };
-
-  function handlePlacement(e){
-    var mapEl = e.target && e.target.closest && e.target.closest(".mapbox[data-map]");
-    if(!mapEl) return;
-    if(typeof pending === "undefined" || !pending) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-    window.mapTap({
-      currentTarget: mapEl,
-      target: mapEl,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      touches: e.touches,
-      changedTouches: e.changedTouches
-    }, mapEl.dataset.map);
-  }
-
-  document.addEventListener("pointerdown", handlePlacement, true);
-  document.addEventListener("touchstart", handlePlacement, {capture:true, passive:false});
-  document.addEventListener("click", handlePlacement, true);
-
-  // If returning to a map page where a position is already selected, draw it immediately.
-  var oldShowWizard = window.showWizard;
-  if(typeof oldShowWizard === "function" && !window.__v119ShowWizardWrapped){
-    window.showWizard = function(step){
-      oldShowWizard(step);
-      setTimeout(function(){
-        try{
-          var mapEl = document.querySelector(".mapbox[data-map]");
-          if(!mapEl || !pending) return;
-          if(mapEl.dataset.map === "d" && pending.dX != null && pending.dY != null){
-            drawMarkerOnMap(mapEl, pending.dX, pending.dY);
-          }
-          if(mapEl.dataset.map === "g" && pending.gX != null && pending.gY != null){
-            drawMarkerOnMap(mapEl, pending.gX, pending.gY);
-          }
-        }catch(err){}
-      },0);
+  var oldFinish=window.finishMatch;
+  if(typeof oldFinish==="function" && !window.__v120FinishWrapped){
+    window.finishMatch=function(){
+      syncFinishHomeGoals();
+      return oldFinish.apply(this, arguments);
     };
-    window.__v119ShowWizardWrapped = true;
+    window.__v120FinishWrapped=true;
   }
+
+  var oldExport=window.exportMatch;
+  if(typeof oldExport==="function" && !window.__v120ExportWrapped){
+    window.exportMatch=function(){
+      syncFinishHomeGoals();
+      return oldExport.apply(this, arguments);
+    };
+    window.__v120ExportWrapped=true;
+  }
+
+  document.addEventListener("input", function(e){
+    if(e.target && e.target.id==="finishHomeGoals") syncFinishHomeGoals();
+  });
 
   setTimeout(function(){
-    document.querySelectorAll("*").forEach(function(el){
-      if(el.children.length===0 && /v1\.\d+/.test(el.textContent||"")){
-        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.19");
-      }
-    });
+    hideOldHomeGoals();
+    updateFinishHomeGoals();
   },0);
 })();
 </script>

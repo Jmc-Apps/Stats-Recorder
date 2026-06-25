@@ -1,0 +1,1 @@
+Goalie Stats Recorder v1.18: fresh rebuild fixing the heat-map marker visibility directly in the map screen code.
