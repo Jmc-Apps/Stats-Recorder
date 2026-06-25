@@ -5,22 +5,6 @@
   "display": "standalone",
   "background_color": "#071014",
   "theme_color": "#071014",
-  "description": "Goalie Stats Recorder v1.23 with fixed goalie/team import and restored icon.",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    }
-  ]
+  "description": "Goalie Stats Recorder v1.24 restores live Save Rate and improves final shot save/cancel flow.",
+  "icons": []
 }
