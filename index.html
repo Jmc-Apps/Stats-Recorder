@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Goalie Stats Recorder v1.25</title>
+<title>Goalie Stats Recorder v1.26</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#071014">
 <style>
@@ -41,25 +41,147 @@ nav{position:fixed;left:0;right:0;bottom:0;height:54px;background:rgba(6,12,16,.
 @media (max-height:720px){.big-actions .btn{font-size:16px;padding:11px}.counter .num{font-size:24px}.defence b{font-size:24px}.card{padding:8px}.mapbox{height:36dvh;min-height:200px}.mapbox.goal{height:28dvh;min-height:170px}}
 </style>
 
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+/* v1.26 live save/defence rates on home screen */
+.live-rate-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.live-rate-card{
+  text-align:center;
+  border:1px solid var(--line,#2d3a43);
+  border-radius:12px;
+  padding:8px;
+  background:#0c1318;
+}
+.live-rate-card span{
+  display:block;
+  font-size:10px;
+  font-weight:900;
+  color:var(--muted,#a9b3bd);
+  text-transform:uppercase;
+}
+.live-rate-card b{
+  display:block;
+  font-size:25px;
+  line-height:1.05;
+  color:var(--green,#61d12f);
+}
+.live-rate-card.save-rate b{color:#61d12f;}
+.live-rate-card.def-rate b{color:#61d12f;}
+@media(max-height:720px){
+  .live-rate-card{padding:7px;}
+  .live-rate-card b{font-size:22px;}
+}
+</style>
 
 
 <style>
-.title-wrap{display:flex;align-items:center;gap:8px;min-width:0}
-.title-wrap h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.app-logo-small{width:34px;height:34px;border-radius:10px;object-fit:cover;box-shadow:0 0 0 2px rgba(97,209,47,.25)}
+/* v1.26 live home rates and prominent final confirm */
+.live-rate-grid{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:7px!important;
+  margin:0!important;
+}
+.live-rate-card{
+  text-align:center!important;
+  border:1px solid var(--line,#2d3a43)!important;
+  border-radius:12px!important;
+  padding:8px!important;
+  background:#0c1318!important;
+}
+.live-rate-card span{
+  display:block!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  color:var(--muted,#a9b3bd)!important;
+  text-transform:uppercase!important;
+}
+.live-rate-card b{
+  display:block!important;
+  font-size:25px!important;
+  line-height:1.05!important;
+  color:var(--green,#61d12f)!important;
+}
+#quickSaveBtn.final-confirm{
+  font-size:18px!important;
+  padding:16px 12px!important;
+  border-radius:16px!important;
+  background:linear-gradient(180deg,#67d936,#2f8d18)!important;
+  box-shadow:0 0 0 3px rgba(97,209,47,.22),0 8px 22px rgba(0,0,0,.35)!important;
+  text-transform:uppercase!important;
+  letter-spacing:.3px!important;
+}
+.final-save-hint{
+  text-align:center;
+  color:#61d12f;
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:4px;
+}
+</style>
+
+
+<style>
+/* v1.26 restored Home layout */
+#home .counter-grid{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:7px!important;
+  width:100%!important;
+}
+#home .counter-grid .counter{
+  width:auto!important;
+  min-width:0!important;
+}
+#home .live-rate-grid{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:7px!important;
+  width:100%!important;
+  margin:0!important;
+}
+#home .live-rate-card{
+  text-align:center!important;
+  border:1px solid var(--line,#2d3a43)!important;
+  border-radius:12px!important;
+  padding:8px!important;
+  background:#0c1318!important;
+  min-width:0!important;
+}
+#home .live-rate-card span{
+  display:block!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  color:var(--muted,#a9b3bd)!important;
+  text-transform:uppercase!important;
+}
+#home .live-rate-card b{
+  display:block!important;
+  font-size:25px!important;
+  line-height:1.05!important;
+  color:var(--green,#61d12f)!important;
+}
+#home .defence.v126-hidden-old-defence{
+  display:none!important;
+}
+@media(max-height:720px){
+  #home .live-rate-card{padding:7px!important;}
+  #home .live-rate-card b{font-size:22px!important;}
+}
 </style>
 
 </head>
 <body>
 <div class="app">
-<header><div class="topbar"><div class="title-wrap"><img class="app-logo-small" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz4KPHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIHJ4PScxMTAnIGZpbGw9JyMwNzEwMTQnLz4KPHJlY3QgeD0nNTQnIHk9JzU0JyB3aWR0aD0nNDA0JyBoZWlnaHQ9JzQwNCcgcng9JzkyJyBmaWxsPScjMTAxODIwJyBzdHJva2U9JyM2MWQxMmYnIHN0cm9rZS13aWR0aD0nMjAnLz4KPHJlY3QgeD0nMTMyJyB5PScxNTAnIHdpZHRoPScyNDgnIGhlaWdodD0nMTUwJyBmaWxsPSdub25lJyBzdHJva2U9JyNmNWY3ZmEnIHN0cm9rZS13aWR0aD0nMjYnLz4KPGxpbmUgeDE9JzEzMicgeTE9JzI0NicgeDI9JzM4MCcgeTI9JzI0Nicgc3Ryb2tlPScjZjVmN2ZhJyBzdHJva2Utd2lkdGg9JzI2Jy8+CjxjaXJjbGUgY3g9JzMxNicgY3k9JzIxNCcgcj0nMzQnIGZpbGw9JyNlMjNiMzAnIHN0cm9rZT0nI2ZmZmZmZicgc3Ryb2tlLXdpZHRoPScxMCcvPgo8dGV4dCB4PScyNTYnIHk9JzM5MicgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1mYW1pbHk9J0FyaWFsLHNhbnMtc2VyaWYnIGZvbnQtd2VpZ2h0PSc5MDAnIGZvbnQtc2l6ZT0nODInIGZpbGw9JyM2MWQxMmYnPkdTUjwvdGV4dD4KPC9zdmc+" alt="Logo"><h1>Goalie Stats Recorder</h1></div><div class="ver">v1.25</div></div></header>
+<header><div class="topbar"><h1>Goalie Stats Recorder</h1><div class="ver">v1.26</div></div></header>
 <main>
 <section id="home" class="screen active">
   <div class="card match-head"><div class="goaliename" id="dashGoalie">No goalie selected</div><div class="team" id="dashTeam">Import/select goalie & team</div><div class="vs">VS</div><div class="opp" id="dashOpp">Opponent</div><div class="small" id="dashDate"></div></div>
-  <div class="counter-grid"><div class="counter save"><div class="label">SAVES</div><div class="num" id="saveCount">0</div></div><div class="live-rate-grid"><div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div><div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div></div><div class="counter goal"><div class="label">GOALS</div><div class="num" id="goalCount">0</div></div></div>
-  <div class="defence"><span>DEFENCE RATE</span><b id="defRate">N/C</b></div>
+  <div class="counter-grid"><div class="counter save"><div class="label">SAVES</div><div class="num" id="saveCount">0</div></div><div class="counter goal"><div class="label">GOALS</div><div class="num" id="goalCount">0</div></div></div>
+  <div class="live-rate-grid"><div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div><div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div></div>
   <div class="card"><b>MATCH TIMELINE</b><div class="timeline" id="timelinePills"></div><div class="home-actions"><button class="btn ghost" id="viewTimelineBtn">VIEW</button><button class="btn orange" id="undoBtn">UNDO</button></div><button class="btn blue" id="periodBtn">END OF PERIOD</button></div>
   <div class="big-actions"><button class="btn green" id="saveBtn">SAVE</button><button class="btn red" id="goalBtn">GOAL</button><button class="btn gold" id="angleBtn">ANGLE CLOSED OFF</button></div>
   <button class="btn blue" id="finishBtn">FINISH MATCH</button>
@@ -70,12 +192,11 @@ nav{position:fixed;left:0;right:0;bottom:0;height:54px;background:rgba(6,12,16,.
 <section id="wizard" class="screen"><div class="wizard-head"><button class="back" id="backWizardBtn">‹</button><h2 id="wizardTitle">Record Shot</h2></div><div class="progress"><div id="progressBar"></div></div><div id="wizardBody" class="scroll"></div><div class="bottom-save"><button class="btn green" id="quickSaveBtn">CONFIRM & SAVE NOW</button></div></section>
 <section id="finish" class="screen"><div class="scroll"><div class="card"><h2>Finish Match</h2><label>Home Team Goals</label><input id="finishHomeGoals" type="number" min="0" value="0"><p class="small">Tap stars to score coaching ratings.</p><div id="ratings"></div><button class="btn green" id="finishSaveBtn">SAVE RATINGS & FINISH</button><button class="btn ghost" id="finishBackBtn">BACK</button></div></div></section>
 <section id="summary" class="screen"><div class="scroll"><div class="card" style="text-align:center"><div class="summary-check">✓</div><h2 style="color:var(--green)">MATCH SAVED!</h2><div id="summaryText"></div><div class="counter-grid" style="margin-top:10px"><div class="counter save"><div class="label">SAVES</div><div class="num" id="sumSaves">0</div></div><div class="counter goal"><div class="label">GOALS</div><div class="num" id="sumGoals">0</div></div></div><div class="counter angle" style="margin-top:8px"><div class="label">ANGLES</div><div class="num" id="sumAngles">0</div></div><div class="defence" style="margin-top:8px"><span>DEFENCE RATE</span><b id="sumDef">N/C</b></div><button class="btn blue" id="exportBtn">EXPORT MATCH</button><button class="btn ghost" id="summaryHomeBtn">BACK TO HOME</button></div></div></section>
-<input id="homeGoals" type="hidden" value="0">
 </main>
 <nav><div class="nav-inner"><button class="navbtn on" data-go="home" data-screen="home"><span>🏠</span>Home</button><button class="navbtn" data-go="setup" data-screen="setup"><span>🥅</span>Setup</button><button class="navbtn" data-go="timeline" data-screen="timeline"><span>📋</span>Timeline</button><button class="navbtn" data-go="import" data-screen="import"><span>☁️</span>Import</button><button class="navbtn" data-go="finish" data-screen="finish"><span>✅</span>Finish</button></div></nav>
 </div>
 <script>
-const RECORDER_VERSION="1.25", HOCKEY_STATS_VERSION="4.09", LS_STATE="gsr_v125_state", LS_MASTER="goalieStatsRecorderMasterData";
+const RECORDER_VERSION="1.26", HOCKEY_STATS_VERSION="4.09", LS_STATE="gsr_v126_state", LS_MASTER="goalieStatsRecorderMasterData";
 let state=JSON.parse(localStorage.getItem(LS_STATE)||"null")||{goalieName:"",homeTeam:"",opponentTeam:"",date:new Date().toISOString().slice(0,10),homeGoals:0,shots:[],timeline:[],ratings:{"Positioning":4,"Communication":4,"Rebound Control":4,"Decision Making":4}};
 let pending=null;
 function $(id){return document.getElementById(id)}
@@ -97,10 +218,10 @@ function render(){
  $("sumSaves").textContent=saves().length;$("sumGoals").textContent=goals().length;$("sumAngles").textContent=angles().length;$("sumDef").textContent=defenceRate();
  $("summaryText").innerHTML='<b>'+(state.goalieName||"")+'</b><br>'+(state.homeTeam||"")+" vs "+(state.opponentTeam||"")+"<br>"+(state.date||"")
 }
-function loadMaster(){let data=null;try{data=JSON.parse(localStorage.getItem(LS_MASTER)||"null")}catch(e){};let gs=$("goalieSelect");if(gs){gs.innerHTML="";if(data&&Array.isArray(data.goalies)&&data.goalies.length){data.goalies.forEach((g,i)=>gs.innerHTML+='<option value="'+i+'">'+(g.name||"Goalie "+(i+1))+'</option>')}else{gs.innerHTML='<option value="">No imported goalies</option>'}}if($("matchDate"))$("matchDate").value=state.date;if($("opponentTeam"))$("opponentTeam").value=state.opponentTeam||"";if($("homeGoals"))if($("homeGoals"))$("homeGoals").value=state.homeGoals||0;if($("finishHomeGoals"))$("finishHomeGoals").value=state.homeGoals||0;goalieChanged(false)}
+function loadMaster(){let data=null;try{data=JSON.parse(localStorage.getItem(LS_MASTER)||"null")}catch(e){};let gs=$("goalieSelect");gs.innerHTML="";if(data&&Array.isArray(data.goalies)&&data.goalies.length){data.goalies.forEach((g,i)=>gs.innerHTML+='<option value="'+i+'">'+(g.name||"Goalie "+(i+1))+'</option>')}else{gs.innerHTML='<option value="">No imported goalies</option>'}$("matchDate").value=state.date;$("opponentTeam").value=state.opponentTeam||"";$("homeGoals").value=state.homeGoals||0;goalieChanged(false)}
 function goalieChanged(update=true){let data=null;try{data=JSON.parse(localStorage.getItem(LS_MASTER)||"null")}catch(e){};let gs=data&&data.goalies?data.goalies:[];let g=gs[Number($("goalieSelect").value)]||null;$("teamSelect").innerHTML="";if(g){if(update)state.goalieName=g.name||"";(g.teams||[]).forEach(t=>$("teamSelect").innerHTML+='<option value="'+t+'">'+t+'</option>')}if(!$("teamSelect").innerHTML)$("teamSelect").innerHTML='<option value="">No teams listed</option>';if(update){state.homeTeam=$("teamSelect").value;save();render()}}
-function syncStateFromForm(){if($("teamSelect"))state.homeTeam=$("teamSelect").value||state.homeTeam||"";if($("matchDate"))state.date=$("matchDate").value||state.date;if($("opponentTeam"))state.opponentTeam=$("opponentTeam").value||"";state.homeGoals=Number((($("finishHomeGoals")&&$("finishHomeGoals").value)||($("homeGoals")&&$("homeGoals").value)||state.homeGoals||0));if($("homeGoals"))if($("homeGoals"))$("homeGoals").value=state.homeGoals||0;save();render()}
-function importMaster(){let f=$("masterFile")&&$("masterFile").files&&$("masterFile").files[0];if(!f){alert("Choose a master data file first.");return}let r=new FileReader();r.onload=()=>{try{let raw=JSON.parse(r.result);let goalies=(raw&&Array.isArray(raw.goalies)&&raw.goalies)||(raw&&raw.data&&Array.isArray(raw.data.goalies)&&raw.data.goalies)||(raw&&raw.payload&&Array.isArray(raw.payload.goalies)&&raw.payload.goalies)||(raw&&raw.export&&Array.isArray(raw.export.goalies)&&raw.export.goalies)||[];if(!goalies.length)throw new Error("No goalies array found.");goalies=goalies.map(g=>{let teams=g.teams||g.teamList||g.homeTeams||[];if(!Array.isArray(teams)&&teams&&typeof teams==="object")teams=Object.keys(teams);if(!Array.isArray(teams))teams=[];return Object.assign({},g,{name:g.name||g.goalieName||"Unnamed Goalie",teams:teams})});let data={goalies:goalies,importedAt:new Date().toISOString()};localStorage.setItem(LS_MASTER,JSON.stringify(data));if($("importStatus"))$("importStatus").textContent="Imported "+data.goalies.length+" goalies.";loadMaster();alert("Goalies & teams imported.")}catch(e){alert("Import failed: "+e.message)}};r.readAsText(f)}
+function syncStateFromForm(){state.homeTeam=$("teamSelect").value||state.homeTeam||"";state.date=$("matchDate").value||state.date;state.opponentTeam=$("opponentTeam").value||"";state.homeGoals=Number($("homeGoals").value||0);save();render()}
+function importMaster(){let f=$("masterFile").files[0];if(!f){alert("Choose a master data file first.");return}let r=new FileReader();r.onload=()=>{try{let data=JSON.parse(r.result);if(!Array.isArray(data.goalies))throw new Error("No goalies array found.");data.importedAt=new Date().toISOString();localStorage.setItem(LS_MASTER,JSON.stringify(data));$("importStatus").textContent="Imported "+data.goalies.length+" goalies.";loadMaster();alert("Goalies & teams imported.")}catch(e){alert("Import failed: "+e.message)}};r.readAsText(f)}
 function addPeriodMarker(){let m={id:"period_"+Date.now(),eventType:"periodMarker",label:"End of Period",time:new Date().toISOString()};state.timeline.push(m);save();render()}
 function startShot(outcome){pending={outcome:outcome,type:"1st Shot",shotCategory:"1st Shot",shotSituation:"Open Play",outnumbered:"Not Out Numbered",rebound:"",dX:null,dY:null,gX:null,gY:null};if(outcome==="Angle Closed Off")showWizard(3);else showWizard(1)}
 function showWizard(step){showScreen("wizard");$("wizardTitle").textContent="Record "+pending.outcome;$("progressBar").style.width=(step*20)+"%";
@@ -149,301 +270,200 @@ document.addEventListener("click",function(e){
  if(t.dataset.ratingLabel){state.ratings[t.dataset.ratingLabel]=Number(t.dataset.ratingVal);save();renderRatings();return}
 });
 document.addEventListener("touchstart",function(e){let m=e.target.closest&&e.target.closest(".mapbox[data-map]");if(m){e.preventDefault();mapTap({currentTarget:m,clientX:e.touches[0].clientX,clientY:e.touches[0].clientY},m.dataset.map)}},{passive:false});
-$("goalieSelect").addEventListener("change",()=>goalieChanged(true));$("teamSelect").addEventListener("change",syncStateFromForm);$("matchDate").addEventListener("change",syncStateFromForm);$("opponentTeam").addEventListener("input",syncStateFromForm);if($("homeGoals"))$("homeGoals").addEventListener("input",syncStateFromForm);if($("finishHomeGoals"))$("finishHomeGoals").addEventListener("input",syncStateFromForm);
+$("goalieSelect").addEventListener("change",()=>goalieChanged(true));$("teamSelect").addEventListener("change",syncStateFromForm);$("matchDate").addEventListener("change",syncStateFromForm);$("opponentTeam").addEventListener("input",syncStateFromForm);$("homeGoals").addEventListener("input",syncStateFromForm);
 window.addEventListener("load",()=>{if(!state.timeline)state.timeline=[];loadMaster();render();if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js")});
 </script>
 
-<style>
-/* v1.25: direct marker placement, no screen redraw on tap */
-.marker{
-  position:absolute!important;
-  width:34px!important;
-  height:34px!important;
-  border-radius:50%!important;
-  transform:translate(-50%,-50%)!important;
-  border:5px solid #fff!important;
-  box-shadow:0 0 0 7px rgba(34,117,215,.55), 0 0 22px rgba(0,0,0,.85)!important;
-  z-index:9999!important;
-  pointer-events:none!important;
-}
-.marker.save{background:#61d12f!important;}
-.marker.goal{background:#e23b30!important;}
-.marker.angle{background:#e4b51b!important;}
-.mapbox[data-map]{
-  position:relative!important;
-  touch-action:none!important;
-  cursor:crosshair!important;
-}
-.position-readout{
-  margin-top:6px;
-  text-align:center;
-  color:#61d12f;
-  font-weight:900;
-  font-size:12px;
-}
-</style>
-
 <script>
-/* v1.25: place the marker directly on the current map instead of redrawing the page */
 (function(){
-  window.RECORDER_VERSION="1.25";
+  window.RECORDER_VERSION="1.26";
 
-  function currentMarkerClass(){
-    try{
-      if(pending && pending.outcome === "Goal") return "goal";
-      if(pending && pending.outcome === "Angle Closed Off") return "angle";
-      return "save";
-    }catch(e){
-      return "save";
-    }
-  }
-
-  function setReadout(mapEl, x, y){
-    var existing = mapEl.parentElement && mapEl.parentElement.querySelector(".position-readout");
-    if(!existing){
-      existing = document.createElement("div");
-      existing.className = "position-readout";
-      mapEl.insertAdjacentElement("afterend", existing);
-    }
-    existing.textContent = "Position selected: " + x + "%, " + y + "%";
-  }
-
-  function drawMarkerOnMap(mapEl, x, y){
-    if(!mapEl) return;
-    var old = mapEl.querySelector(".marker");
-    if(!old){
-      old = document.createElement("div");
-      mapEl.appendChild(old);
-    }
-    old.className = "marker " + currentMarkerClass();
-    old.style.left = x + "%";
-    old.style.top = y + "%";
-    setReadout(mapEl, x, y);
-  }
-
-  function calculatePoint(e, mapEl){
-    var r = mapEl.getBoundingClientRect();
-    var clientX = e.clientX;
-    var clientY = e.clientY;
-
-    if(e.touches && e.touches.length){
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-    if(e.changedTouches && e.changedTouches.length){
-      clientX = e.changedTouches[0].clientX;
-      clientY = e.changedTouches[0].clientY;
-    }
-
-    var x = ((clientX - r.left) / r.width) * 100;
-    var y = ((clientY - r.top) / r.height) * 100;
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-
-    return {
-      x: Math.round(x * 10) / 10,
-      y: Math.round(y * 10) / 10
-    };
-  }
-
-  window.mapTap = function(e, kind){
-    if(typeof pending === "undefined" || !pending) return;
-    var mapEl = e.currentTarget || (e.target && e.target.closest && e.target.closest(".mapbox[data-map]"));
-    if(!mapEl) return;
-
-    var p = calculatePoint(e, mapEl);
-
-    if(kind === "d" || mapEl.dataset.map === "d"){
-      pending.dX = p.x;
-      pending.dY = p.y;
-    }else{
-      pending.gX = p.x;
-      pending.gY = p.y;
-    }
-
-    drawMarkerOnMap(mapEl, p.x, p.y);
-  };
-
-  function handlePlacement(e){
-    var mapEl = e.target && e.target.closest && e.target.closest(".mapbox[data-map]");
-    if(!mapEl) return;
-    if(typeof pending === "undefined" || !pending) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-    window.mapTap({
-      currentTarget: mapEl,
-      target: mapEl,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      touches: e.touches,
-      changedTouches: e.changedTouches
-    }, mapEl.dataset.map);
-  }
-
-  document.addEventListener("pointerdown", handlePlacement, true);
-  document.addEventListener("touchstart", handlePlacement, {capture:true, passive:false});
-  document.addEventListener("click", handlePlacement, true);
-
-  // If returning to a map page where a position is already selected, draw it immediately.
-  var oldShowWizard = window.showWizard;
-  if(typeof oldShowWizard === "function" && !window.__v119ShowWizardWrapped){
-    window.showWizard = function(step){
-      oldShowWizard(step);
-      setTimeout(function(){
-        try{
-          var mapEl = document.querySelector(".mapbox[data-map]");
-          if(!mapEl || !pending) return;
-          if(mapEl.dataset.map === "d" && pending.dX != null && pending.dY != null){
-            drawMarkerOnMap(mapEl, pending.dX, pending.dY);
-          }
-          if(mapEl.dataset.map === "g" && pending.gX != null && pending.gY != null){
-            drawMarkerOnMap(mapEl, pending.gX, pending.gY);
-          }
-        }catch(err){}
-      },0);
-    };
-    window.__v119ShowWizardWrapped = true;
-  }
-
-  setTimeout(function(){
-    document.querySelectorAll("*").forEach(function(el){
-      if(el.children.length===0 && /v1\.\d+/.test(el.textContent||"")){
-        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.25");
-      }
-    });
-  },0);
-})();
-</script>
-
-
-<script>
-/* v1.25: import fix after moving Home Goals + app icon restore */
-(function(){
-  window.RECORDER_VERSION="1.25";
-
-  function num(v){
-    var n = Number(v || 0);
-    return Number.isFinite(n) ? n : 0;
-  }
-
-  function ensureLegacyHomeGoalsField(){
-    var old = document.getElementById("homeGoals");
-    if(!old){
-      old = document.createElement("input");
-      old.id = "homeGoals";
-      old.type = "hidden";
-      document.body.appendChild(old);
-    }
-    old.type = "hidden";
-    old.style.display = "none";
-    if(typeof state !== "undefined"){
-      old.value = state.homeGoals || 0;
-    }
-  }
+  function n(v){ var x=Number(v||0); return Number.isFinite(x)?x:0; }
 
   function syncFinishHomeGoals(){
-    ensureLegacyHomeGoalsField();
-    var finish = document.getElementById("finishHomeGoals");
-    var old = document.getElementById("homeGoals");
-    if(typeof state !== "undefined"){
-      state.homeGoals = num((finish && finish.value) || (old && old.value) || state.homeGoals || 0);
-      if(old) old.value = state.homeGoals || 0;
+    var el=document.getElementById("finishHomeGoals");
+    if(el && typeof state !== "undefined"){
+      state.homeGoals=n(el.value);
       try{ save(); }catch(e){}
       try{ render(); }catch(e){}
     }
   }
 
   function updateFinishHomeGoals(){
-    ensureLegacyHomeGoalsField();
-    var finish = document.getElementById("finishHomeGoals");
-    if(finish && typeof state !== "undefined"){
-      finish.value = state.homeGoals || 0;
-    }
+    var el=document.getElementById("finishHomeGoals");
+    if(el && typeof state !== "undefined") el.value=state.homeGoals||0;
   }
 
-  function hideSetupHomeGoalsIfPresent(){
-    var old = document.getElementById("homeGoals");
+  function hideOldHomeGoals(){
+    var old=document.getElementById("homeGoals");
     if(old){
-      old.type = "hidden";
-      old.style.display = "none";
-      var label = old.previousElementSibling;
-      if(label && /home goals/i.test(label.textContent || "")){
-        label.style.display = "none";
-      }
+      var label=old.previousElementSibling;
+      if(label && /home goals/i.test(label.textContent||"")) label.style.display="none";
+      old.style.display="none";
     }
   }
 
-  // Replace loadMaster with a safe wrapper if it exists.
-  var oldLoadMaster = window.loadMaster;
-  if(typeof oldLoadMaster === "function" && !window.__v121LoadMasterWrapped){
-    window.loadMaster = function(){
-      ensureLegacyHomeGoalsField();
-      var result = oldLoadMaster.apply(this, arguments);
-      ensureLegacyHomeGoalsField();
-      updateFinishHomeGoals();
-      hideSetupHomeGoalsIfPresent();
-      return result;
-    };
-    window.__v121LoadMasterWrapped = true;
-  }
-
-  // Replace syncStateFromForm with a safe wrapper if it exists.
-  var oldSync = window.syncStateFromForm;
-  if(typeof oldSync === "function" && !window.__v121SyncWrapped){
-    window.syncStateFromForm = function(){
-      ensureLegacyHomeGoalsField();
-      var result = oldSync.apply(this, arguments);
-      syncFinishHomeGoals();
-      return result;
-    };
-    window.__v121SyncWrapped = true;
-  }
-
-  var oldShow = window.showScreen;
-  if(typeof oldShow === "function" && !window.__v121ShowWrapped){
-    window.showScreen = function(id){
-      ensureLegacyHomeGoalsField();
+  var oldShow=window.showScreen;
+  if(typeof oldShow==="function" && !window.__v120ShowWrapped){
+    window.showScreen=function(id){
       oldShow.apply(this, arguments);
-      if(id === "finish") updateFinishHomeGoals();
-      hideSetupHomeGoalsIfPresent();
+      if(id==="finish") updateFinishHomeGoals();
+      hideOldHomeGoals();
     };
-    window.__v121ShowWrapped = true;
+    window.__v120ShowWrapped=true;
   }
 
-  var oldFinish = window.finishMatch;
-  if(typeof oldFinish === "function" && !window.__v121FinishWrapped){
-    window.finishMatch = function(){
+  var oldFinish=window.finishMatch;
+  if(typeof oldFinish==="function" && !window.__v120FinishWrapped){
+    window.finishMatch=function(){
       syncFinishHomeGoals();
       return oldFinish.apply(this, arguments);
     };
-    window.__v121FinishWrapped = true;
+    window.__v120FinishWrapped=true;
   }
 
-  var oldExport = window.exportMatch;
-  if(typeof oldExport === "function" && !window.__v121ExportWrapped){
-    window.exportMatch = function(){
+  var oldExport=window.exportMatch;
+  if(typeof oldExport==="function" && !window.__v120ExportWrapped){
+    window.exportMatch=function(){
       syncFinishHomeGoals();
       return oldExport.apply(this, arguments);
     };
-    window.__v121ExportWrapped = true;
+    window.__v120ExportWrapped=true;
   }
 
   document.addEventListener("input", function(e){
-    if(e.target && e.target.id === "finishHomeGoals"){
-      syncFinishHomeGoals();
-    }
+    if(e.target && e.target.id==="finishHomeGoals") syncFinishHomeGoals();
   });
 
   setTimeout(function(){
-    ensureLegacyHomeGoalsField();
-    hideSetupHomeGoalsIfPresent();
+    hideOldHomeGoals();
     updateFinishHomeGoals();
+  },0);
+})();
+</script>
+
+
+<script>
+/* v1.26: live Save Rate and Defence Rate on Home screen */
+(function(){
+  window.RECORDER_VERSION="1.26";
+
+  function pct(a,b){
+    return b > 0 ? Math.round((a / b) * 100) + "%" : "N/C";
+  }
+
+  function shotList(){
+    try{
+      if(typeof shotOnly === "function") return shotOnly();
+    }catch(e){}
+    try{
+      if(typeof state !== "undefined" && Array.isArray(state.shots)){
+        return state.shots.filter(function(s){ return !s.eventType; });
+      }
+    }catch(e){}
+    return [];
+  }
+
+  function calcLiveSaveRate(){
+    var shots = shotList();
+    var saves = shots.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = shots.filter(function(s){ return s.outcome === "Goal"; }).length;
+    return pct(saves, saves + goals);
+  }
+
+  function calcLiveDefenceRate(){
+    var shots = shotList();
+    var saves = shots.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = shots.filter(function(s){ return s.outcome === "Goal"; }).length;
+    var angles = shots.filter(function(s){ return s.outcome === "Angle Closed Off"; }).length;
+    return pct(saves + angles, saves + goals + angles);
+  }
+
+  function ensureLiveRatePanel(){
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
+
+    if(saveEl && defEl) return;
+
+    var oldDef = document.getElementById("defRate");
+    if(oldDef){
+      var oldCard = oldDef.closest(".defence,.card,div");
+      if(oldCard && !document.getElementById("saveRateLive")){
+        var grid = document.createElement("div");
+        grid.className = "live-rate-grid";
+        grid.innerHTML =
+          '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+          '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+        oldCard.replaceWith(grid);
+      }
+      return;
+    }
+
+    var counterGrid = document.querySelector(".counter-grid");
+    if(counterGrid && !document.getElementById("saveRateLive")){
+      var panel = document.createElement("div");
+      panel.className = "live-rate-grid";
+      panel.innerHTML =
+        '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+        '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+      counterGrid.insertAdjacentElement("afterend", panel);
+    }
+  }
+
+  function renderLiveRates(){
+    ensureLiveRatePanel();
+
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
+
+    if(saveEl) saveEl.textContent = calcLiveSaveRate();
+    if(defEl) defEl.textContent = calcLiveDefenceRate();
+  }
+
+  var oldRender = window.render;
+  if(typeof oldRender === "function" && !window.__v122RenderWrapped){
+    window.render = function(){
+      var result = oldRender.apply(this, arguments);
+      renderLiveRates();
+      return result;
+    };
+    window.__v122RenderWrapped = true;
+  }
+
+  var oldShowScreen = window.showScreen;
+  if(typeof oldShowScreen === "function" && !window.__v122ShowWrapped){
+    window.showScreen = function(){
+      var result = oldShowScreen.apply(this, arguments);
+      renderLiveRates();
+      return result;
+    };
+    window.__v122ShowWrapped = true;
+  }
+
+  ["saveShot","undoPrompt","addPeriodMarker"].forEach(function(fnName){
+    var oldFn = window[fnName];
+    if(typeof oldFn === "function" && !oldFn.__v122RatesWrapped){
+      window[fnName] = function(){
+        var result = oldFn.apply(this, arguments);
+        setTimeout(renderLiveRates, 0);
+        return result;
+      };
+      window[fnName].__v122RatesWrapped = true;
+    }
+  });
+
+  document.addEventListener("click", function(){
+    setTimeout(renderLiveRates, 0);
+  });
+  document.addEventListener("change", function(){
+    setTimeout(renderLiveRates, 0);
+  });
+
+  setTimeout(function(){
+    renderLiveRates();
     document.querySelectorAll("*").forEach(function(el){
       if(el.children.length === 0 && /v1\.\d+/.test(el.textContent || "")){
-        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.25");
+        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.26");
       }
     });
   }, 0);
@@ -452,235 +472,357 @@ window.addEventListener("load",()=>{if(!state.timeline)state.timeline=[];loadMas
 
 
 <script>
-/* v1.25: final fix for removed #homeGoals and robust master import */
+/* v1.26: restore live Save Rate, prominent final save, confirm before cancel */
 (function(){
-  window.RECORDER_VERSION="1.25";
+  window.RECORDER_VERSION="1.26";
 
-  function $(id){ return document.getElementById(id); }
+  function pct(a,b){
+    return b > 0 ? Math.round((a / b) * 100) + "%" : "N/C";
+  }
 
-  function ensureHomeGoalsCompat(){
-    var old = $("homeGoals");
-    if(!old){
-      old = document.createElement("input");
-      old.id = "homeGoals";
-      old.type = "hidden";
-      old.style.display = "none";
-      document.body.appendChild(old);
-    }
-    old.type = "hidden";
-    old.style.display = "none";
+  function shots(){
     try{
-      if(typeof state !== "undefined"){
-        old.value = state.homeGoals || 0;
-        var finish = $("finishHomeGoals");
-        if(finish) finish.value = state.homeGoals || 0;
+      if(typeof shotOnly === "function") return shotOnly();
+    }catch(e){}
+    try{
+      if(typeof state !== "undefined" && Array.isArray(state.shots)){
+        return state.shots.filter(function(s){ return !s.eventType; });
       }
     }catch(e){}
+    return [];
   }
 
-  function normalizeMaster(raw){
-    var goalies =
-      (raw && Array.isArray(raw.goalies) && raw.goalies) ||
-      (raw && raw.data && Array.isArray(raw.data.goalies) && raw.data.goalies) ||
-      (raw && raw.payload && Array.isArray(raw.payload.goalies) && raw.payload.goalies) ||
-      (raw && raw.export && Array.isArray(raw.export.goalies) && raw.export.goalies) ||
-      [];
-
-    if(!goalies.length) throw new Error("No goalies array found in the selected file.");
-
-    goalies = goalies.map(function(g){
-      var teams = g.teams || g.teamList || g.homeTeams || [];
-      if(!Array.isArray(teams) && teams && typeof teams === "object") teams = Object.keys(teams);
-      if(!Array.isArray(teams)) teams = [];
-      return Object.assign({}, g, {
-        name: g.name || g.goalieName || "Unnamed Goalie",
-        teams: teams
-      });
-    });
-
-    return { goalies: goalies, importedAt: new Date().toISOString() };
+  function liveSaveRate(){
+    var list = shots();
+    var saves = list.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = list.filter(function(s){ return s.outcome === "Goal"; }).length;
+    return pct(saves, saves + goals);
   }
 
-  // Replace importMaster completely, so it never calls old crashing setup code until safely patched.
-  window.importMaster = function(){
-    ensureHomeGoalsCompat();
+  function liveDefenceRate(){
+    var list = shots();
+    var saves = list.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = list.filter(function(s){ return s.outcome === "Goal"; }).length;
+    var angles = list.filter(function(s){ return s.outcome === "Angle Closed Off"; }).length;
+    return pct(saves + angles, saves + goals + angles);
+  }
 
-    var input = $("masterFile");
-    var f = input && input.files && input.files[0];
-    if(!f){ alert("Choose a master data file first."); return; }
+  function ensureRateGrid(){
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
 
-    var r = new FileReader();
-    r.onload = function(){
-      try{
-        var raw = JSON.parse(r.result);
-        var data = normalizeMaster(raw);
-        localStorage.setItem("goalieStatsRecorderMasterData", JSON.stringify(data));
+    if(saveEl && defEl) return;
 
-        var status = $("importStatus");
-        if(status) status.textContent = "Imported " + data.goalies.length + " goalies.";
-
-        // Populate goalie/team selects directly.
-        var gs = $("goalieSelect");
-        if(gs){
-          gs.innerHTML = "";
-          data.goalies.forEach(function(g,i){
-            gs.innerHTML += '<option value="'+i+'">'+(g.name || ("Goalie " + (i+1)))+'</option>';
-          });
-        }
-
-        if(typeof goalieChanged === "function") goalieChanged(false);
-
-        alert("Goalies & teams imported.");
-      }catch(e){
-        alert("Import failed: " + e.message);
+    var existingDef = document.getElementById("defRate");
+    if(existingDef){
+      var box = existingDef.closest(".defence,.live-rate-grid,.card,div");
+      if(box && !document.getElementById("saveRateLive")){
+        var grid = document.createElement("div");
+        grid.className = "live-rate-grid";
+        grid.innerHTML =
+          '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+          '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+        box.replaceWith(grid);
+        return;
       }
+    }
+
+    var counterGrid = document.querySelector("#home .counter-grid") || document.querySelector(".counter-grid");
+    if(counterGrid && !document.getElementById("saveRateLive")){
+      var panel = document.createElement("div");
+      panel.className = "live-rate-grid";
+      panel.innerHTML =
+        '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+        '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+      counterGrid.insertAdjacentElement("afterend", panel);
+    }
+  }
+
+  function renderLiveRates(){
+    ensureRateGrid();
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
+    if(saveEl) saveEl.textContent = liveSaveRate();
+    if(defEl) defEl.textContent = liveDefenceRate();
+  }
+
+  function isFinalShotSummary(){
+    var body = document.getElementById("wizardBody");
+    if(!body) return false;
+    var text = (body.textContent || "").toLowerCase();
+    return text.includes("shot type:") && text.includes("situation:") && text.includes("out numbered:");
+  }
+
+  function styleFinalConfirm(){
+    var btn = document.getElementById("quickSaveBtn");
+    if(!btn) return;
+
+    if(isFinalShotSummary()){
+      btn.classList.add("final-confirm");
+      btn.textContent = "CONFIRM & SAVE SHOT";
+      if(!document.querySelector(".final-save-hint")){
+        var hint = document.createElement("div");
+        hint.className = "final-save-hint";
+        hint.textContent = "Review the details, then save the shot.";
+        btn.parentElement.insertBefore(hint, btn);
+      }
+    }else{
+      btn.classList.remove("final-confirm");
+      if(btn.textContent.trim().toUpperCase() === "CONFIRM & SAVE SHOT"){
+        btn.textContent = "CONFIRM & SAVE NOW";
+      }
+      var hint = document.querySelector(".final-save-hint");
+      if(hint) hint.remove();
+    }
+  }
+
+  function refreshUi(){
+    renderLiveRates();
+    styleFinalConfirm();
+  }
+
+  // Wrap render/show/wizard functions.
+  var oldRender = window.render;
+  if(typeof oldRender === "function" && !window.__v124RenderWrapped){
+    window.render = function(){
+      var result = oldRender.apply(this, arguments);
+      refreshUi();
+      return result;
     };
-    r.readAsText(f);
-  };
+    window.__v124RenderWrapped = true;
+  }
 
-  // Replace loadMaster with a safe version if the old one still crashes.
-  window.loadMaster = function(){
-    ensureHomeGoalsCompat();
+  var oldShowScreen = window.showScreen;
+  if(typeof oldShowScreen === "function" && !window.__v124ShowWrapped){
+    window.showScreen = function(){
+      var result = oldShowScreen.apply(this, arguments);
+      refreshUi();
+      return result;
+    };
+    window.__v124ShowWrapped = true;
+  }
 
-    var data = null;
-    try{ data = JSON.parse(localStorage.getItem("goalieStatsRecorderMasterData") || "null"); }catch(e){}
+  var oldShowWizard = window.showWizard;
+  if(typeof oldShowWizard === "function" && !window.__v124WizardWrapped){
+    window.showWizard = function(){
+      var result = oldShowWizard.apply(this, arguments);
+      setTimeout(refreshUi, 0);
+      return result;
+    };
+    window.__v124WizardWrapped = true;
+  }
 
-    var gs = $("goalieSelect");
-    if(gs){
-      gs.innerHTML = "";
-      if(data && Array.isArray(data.goalies) && data.goalies.length){
-        data.goalies.forEach(function(g,i){
-          gs.innerHTML += '<option value="'+i+'">'+(g.name || ("Goalie "+(i+1)))+'</option>';
-        });
-      }else{
-        gs.innerHTML = '<option value="">No imported goalies</option>';
-      }
+  ["saveShot","undoPrompt","addPeriodMarker"].forEach(function(fnName){
+    var oldFn = window[fnName];
+    if(typeof oldFn === "function" && !oldFn.__v124Wrapped){
+      window[fnName] = function(){
+        var result = oldFn.apply(this, arguments);
+        setTimeout(refreshUi, 0);
+        return result;
+      };
+      window[fnName].__v124Wrapped = true;
     }
+  });
 
-    if($("matchDate") && typeof state !== "undefined") $("matchDate").value = state.date || "";
-    if($("opponentTeam") && typeof state !== "undefined") $("opponentTeam").value = state.opponentTeam || "";
-    if($("finishHomeGoals") && typeof state !== "undefined") $("finishHomeGoals").value = state.homeGoals || 0;
+  // Confirm before cancelling a shot in progress.
+  document.addEventListener("click", function(e){
+    var cancelTarget = e.target && e.target.closest && e.target.closest('#backWizardBtn,[data-action="cancel"]');
+    if(!cancelTarget) return;
 
-    if(typeof goalieChanged === "function"){
-      try{ goalieChanged(false); }catch(e){}
-    }
-  };
-
-  window.syncStateFromForm = function(){
-    ensureHomeGoalsCompat();
     try{
-      if(typeof state === "undefined") return;
-      if($("teamSelect")) state.homeTeam = $("teamSelect").value || state.homeTeam || "";
-      if($("matchDate")) state.date = $("matchDate").value || state.date;
-      if($("opponentTeam")) state.opponentTeam = $("opponentTeam").value || "";
-      state.homeGoals = Number((($("finishHomeGoals") && $("finishHomeGoals").value) || state.homeGoals || 0));
-
-      if($("homeGoals")) if($("homeGoals"))$("homeGoals").value = state.homeGoals || 0;
-
-      if(typeof save === "function") save();
-      if(typeof render === "function") render();
-    }catch(e){
-      alert("Could not save setup: " + e.message);
-    }
-  };
-
-  var oldShow = window.showScreen;
-  if(typeof oldShow === "function"){
-    window.showScreen = function(id){
-      ensureHomeGoalsCompat();
-      oldShow.apply(this, arguments);
-      if(id === "finish" && $("finishHomeGoals") && typeof state !== "undefined"){
-        $("finishHomeGoals").value = state.homeGoals || 0;
+      if(typeof pending !== "undefined" && pending){
+        var ok = confirm("Cancel this shot? The shot details you have entered will be lost.");
+        if(!ok){
+          e.preventDefault();
+          e.stopPropagation();
+          if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+          return false;
+        }
       }
+    }catch(err){}
+  }, true);
+
+  // If cancelShot is called elsewhere, protect it too.
+  var oldCancelShot = window.cancelShot;
+  if(typeof oldCancelShot === "function" && !window.__v124CancelWrapped){
+    window.cancelShot = function(){
+      try{
+        if(typeof pending !== "undefined" && pending){
+          if(!confirm("Cancel this shot? The shot details you have entered will be lost.")){
+            return;
+          }
+        }
+      }catch(e){}
+      return oldCancelShot.apply(this, arguments);
     };
+    window.__v124CancelWrapped = true;
   }
+
+  document.addEventListener("click", function(){ setTimeout(refreshUi, 0); });
+  document.addEventListener("change", function(){ setTimeout(refreshUi, 0); });
 
   setTimeout(function(){
-    ensureHomeGoalsCompat();
-    if($("finishHomeGoals")){
-      $("finishHomeGoals").addEventListener("input", window.syncStateFromForm);
-    }
+    refreshUi();
     document.querySelectorAll("*").forEach(function(el){
-      if(el.children.length===0 && /v1\.\d+/.test(el.textContent||"")){
-        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.25");
+      if(el.children.length === 0 && /v1\.\d+/.test(el.textContent || "")){
+        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.26");
       }
     });
-  },0);
+  }, 0);
 })();
 </script>
 
 
 <script>
-/* v1.25: final UI checks for rates, final save prominence, and cancel confirmation */
+/* v1.26: restore Home layout and remove duplicate old defence card */
 (function(){
-  window.RECORDER_VERSION = "1.25";
+  window.RECORDER_VERSION = "1.26";
 
-  function pct(a,b){return b>0?Math.round(a/b*100)+"%":"N/C"}
-  function list(){try{return shotOnly()}catch(e){return (typeof state!=="undefined"&&Array.isArray(state.shots))?state.shots.filter(s=>!s.eventType):[]}}
-  function saveRate(){let s=list(),sv=s.filter(x=>x.outcome==="Save").length,gl=s.filter(x=>x.outcome==="Goal").length;return pct(sv,sv+gl)}
-  function defRate(){let s=list(),sv=s.filter(x=>x.outcome==="Save").length,gl=s.filter(x=>x.outcome==="Goal").length,an=s.filter(x=>x.outcome==="Angle Closed Off").length;return pct(sv+an,sv+gl+an)}
+  function pct(a,b){
+    return b > 0 ? Math.round((a / b) * 100) + "%" : "N/C";
+  }
 
-  function ensureRates(){
-    let saveEl=document.getElementById("saveRateLive"), defEl=document.getElementById("defRate");
-    if(!saveEl || !defEl){
-      const counter=document.querySelector("#home .counter-grid")||document.querySelector(".counter-grid");
-      if(counter && !document.getElementById("saveRateLive")){
-        const panel=document.createElement("div");
-        panel.className="live-rate-grid";
-        panel.innerHTML='<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div><div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
-        counter.insertAdjacentElement("afterend",panel);
+  function shots(){
+    try{
+      if(typeof shotOnly === "function") return shotOnly();
+    }catch(e){}
+    try{
+      if(typeof state !== "undefined" && Array.isArray(state.shots)){
+        return state.shots.filter(function(s){ return !s.eventType; });
       }
+    }catch(e){}
+    return [];
+  }
+
+  function calcSaveRate(){
+    var list = shots();
+    var saves = list.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = list.filter(function(s){ return s.outcome === "Goal"; }).length;
+    return pct(saves, saves + goals);
+  }
+
+  function calcDefenceRate(){
+    var list = shots();
+    var saves = list.filter(function(s){ return s.outcome === "Save"; }).length;
+    var goals = list.filter(function(s){ return s.outcome === "Goal"; }).length;
+    var angles = list.filter(function(s){ return s.outcome === "Angle Closed Off"; }).length;
+    return pct(saves + angles, saves + goals + angles);
+  }
+
+  function ensureHomeLayout(){
+    var home = document.getElementById("home");
+    if(!home) return;
+
+    // Force Saves and Goals counters back into a 2-column block.
+    var saveCounter = document.getElementById("saveCount");
+    var goalCounter = document.getElementById("goalCount");
+    var saveCard = saveCounter ? saveCounter.closest(".counter") : null;
+    var goalCard = goalCounter ? goalCounter.closest(".counter") : null;
+
+    var grid = home.querySelector(".counter-grid");
+    if(!grid && saveCard && goalCard){
+      grid = document.createElement("div");
+      grid.className = "counter-grid";
+      saveCard.parentNode.insertBefore(grid, saveCard);
+      grid.appendChild(saveCard);
+      grid.appendChild(goalCard);
+    }else if(grid && saveCard && goalCard){
+      if(saveCard.parentNode !== grid) grid.appendChild(saveCard);
+      if(goalCard.parentNode !== grid) grid.appendChild(goalCard);
     }
-    saveEl=document.getElementById("saveRateLive");defEl=document.getElementById("defRate");
-    if(saveEl)saveEl.textContent=saveRate();
-    if(defEl)defEl.textContent=defRate();
-  }
 
-  function finalSummaryVisible(){
-    const b=document.getElementById("wizardBody");
-    const t=(b&&b.textContent||"").toLowerCase();
-    return t.includes("shot type:")&&t.includes("situation:")&&t.includes("out numbered:");
-  }
-
-  function styleFinal(){
-    const btn=document.getElementById("quickSaveBtn");
-    if(!btn)return;
-    if(finalSummaryVisible()){
-      btn.classList.add("final-confirm");
-      btn.textContent="CONFIRM & SAVE SHOT";
-      if(!document.querySelector(".final-save-hint")){
-        const hint=document.createElement("div");
-        hint.className="final-save-hint";
-        hint.textContent="Review the details, then save the shot.";
-        btn.parentElement.insertBefore(hint,btn);
+    // Remove duplicated/old one-line rate text if previous patches inserted it badly.
+    Array.from(home.childNodes).forEach(function(node){
+      if(node.nodeType === 3 && /Save Rate|Defence Rate/.test(node.textContent || "")){
+        node.textContent = "";
       }
+    });
+    Array.from(home.querySelectorAll("div,span,p")).forEach(function(el){
+      if(el.id === "saveRateLive" || el.id === "defRate" || el.closest(".live-rate-grid")) return;
+      var txt = (el.textContent || "").replace(/\s+/g," ").trim();
+      if(/^Save Rate\s*N\/C\s*Defence Rate\s*N\/C$/.test(txt) || /^Save Rate/.test(txt) && txt.includes("Defence Rate") && el.children.length < 2){
+        el.remove();
+      }
+    });
+
+    // Hide old single defence card outside the new grid.
+    Array.from(home.querySelectorAll(".defence")).forEach(function(el){
+      if(!el.closest(".live-rate-grid")){
+        el.classList.add("v126-hidden-old-defence");
+      }
+    });
+
+    // Ensure the rates are a clean 2-column block directly under saves/goals.
+    var rateGrid = home.querySelector(".live-rate-grid");
+    if(!rateGrid){
+      rateGrid = document.createElement("div");
+      rateGrid.className = "live-rate-grid";
+      rateGrid.innerHTML =
+        '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+        '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
     }else{
-      btn.classList.remove("final-confirm");
-      if(btn.textContent.trim().toUpperCase()==="CONFIRM & SAVE SHOT")btn.textContent="CONFIRM & SAVE NOW";
-      const h=document.querySelector(".final-save-hint");if(h)h.remove();
+      rateGrid.className = "live-rate-grid";
+      rateGrid.innerHTML =
+        '<div class="live-rate-card save-rate"><span>Save Rate</span><b id="saveRateLive">N/C</b></div>' +
+        '<div class="live-rate-card def-rate"><span>Defence Rate</span><b id="defRate">N/C</b></div>';
+    }
+
+    if(grid && grid.nextElementSibling !== rateGrid){
+      grid.insertAdjacentElement("afterend", rateGrid);
     }
   }
 
-  function refresh(){ensureRates();styleFinal();}
+  function renderRates(){
+    ensureHomeLayout();
+    var saveEl = document.getElementById("saveRateLive");
+    var defEl = document.getElementById("defRate");
+    if(saveEl) saveEl.textContent = calcSaveRate();
+    if(defEl) defEl.textContent = calcDefenceRate();
+  }
 
-  const oldRender=window.render;if(typeof oldRender==="function"&&!window.__v125Render){window.render=function(){const r=oldRender.apply(this,arguments);refresh();return r};window.__v125Render=true}
-  const oldShow=window.showScreen;if(typeof oldShow==="function"&&!window.__v125Show){window.showScreen=function(){const r=oldShow.apply(this,arguments);refresh();return r};window.__v125Show=true}
-  const oldWiz=window.showWizard;if(typeof oldWiz==="function"&&!window.__v125Wiz){window.showWizard=function(){const r=oldWiz.apply(this,arguments);setTimeout(refresh,0);return r};window.__v125Wiz=true}
+  var oldRender = window.render;
+  if(typeof oldRender === "function" && !window.__v126RenderWrapped){
+    window.render = function(){
+      var result = oldRender.apply(this, arguments);
+      renderRates();
+      return result;
+    };
+    window.__v126RenderWrapped = true;
+  }
 
-  document.addEventListener("click",function(e){
-    const cancel=e.target&&e.target.closest&&e.target.closest('#backWizardBtn,[data-action="cancel"]');
-    if(cancel){
-      try{
-        if(typeof pending!=="undefined"&&pending&&!confirm("Cancel this shot? The shot details you have entered will be lost.")){
-          e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();return false;
-        }
-      }catch(err){}
+  var oldShowScreen = window.showScreen;
+  if(typeof oldShowScreen === "function" && !window.__v126ShowWrapped){
+    window.showScreen = function(){
+      var result = oldShowScreen.apply(this, arguments);
+      renderRates();
+      return result;
+    };
+    window.__v126ShowWrapped = true;
+  }
+
+  ["saveShot","undoPrompt","addPeriodMarker"].forEach(function(fnName){
+    var oldFn = window[fnName];
+    if(typeof oldFn === "function" && !oldFn.__v126Wrapped){
+      window[fnName] = function(){
+        var result = oldFn.apply(this, arguments);
+        setTimeout(renderRates, 0);
+        return result;
+      };
+      window[fnName].__v126Wrapped = true;
     }
-    setTimeout(refresh,0);
-  },true);
+  });
 
-  document.addEventListener("change",()=>setTimeout(refresh,0));
-  setTimeout(refresh,0);
+  document.addEventListener("click", function(){ setTimeout(renderRates, 0); });
+  document.addEventListener("change", function(){ setTimeout(renderRates, 0); });
+
+  setTimeout(function(){
+    renderRates();
+    document.querySelectorAll("*").forEach(function(el){
+      if(el.children.length === 0 && /v1\.\d+/.test(el.textContent || "")){
+        el.textContent = el.textContent.replace(/v1\.\d+/g, "v1.26");
+      }
+    });
+  }, 0);
 })();
 </script>
 
